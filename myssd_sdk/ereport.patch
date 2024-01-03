@@ -1,0 +1,35 @@
+diff --git a/src/ftl/amu.c b/src/ftl/amu.c
+index 7beebca..2dce691 100644
+--- a/src/ftl/amu.c
++++ b/src/ftl/amu.c
+@@ -893,12 +893,16 @@ int amu_dispatch(struct list_head* txn_list)
+     list_for_each_entry(txn, txn_list, list)
+     {
+         if (txn->ppa_ready) {
+-            amu_submit_transaction(txn);
++            r = amu_submit_transaction(txn);
++
++            if (r != 0) break;
+         }
+     }
+ 
+ cleanup:
+     if (r) {
++        /* TODO: Revert any mapping table change. */
++
+         list_for_each_entry(txn, txn_list, list)
+         {
+             if (txn->type == TXN_WRITE && txn->ppa_ready) {
+diff --git a/src/hostif/nvme.c b/src/hostif/nvme.c
+index 97ea115..28be8ce 100644
+--- a/src/hostif/nvme.c
++++ b/src/hostif/nvme.c
+@@ -67,6 +67,8 @@ static inline int err2statuscode(int err)
+         return NVME_SC_INVALID_OPCODE;
+     case ESRCH:
+         return NVME_SC_INVALID_NS;
++    case EBADMSG:
++        return NVME_SC_READ_ERROR;
+     default:
+         return NVME_SC_INTERNAL;
+     }

@@ -1,0 +1,10 @@
+diff a/src/ftl/data_cache.c b/src/ftl/data_cache.c	(rejected hunks)
+@@ -235,7 +235,7 @@ static int cache_add(struct data_cache* cache, unsigned int nsid, lpa_t lpa,
+     mutex_init(&entry->mutex, &mutex_attr);
+ 
+     /* Allocate data buffer for the entry. Prefer PL DDR. */
+-    entry->data = alloc_vmpages(FLASH_PG_SIZE >> ARCH_PG_SHIFT, ZONE_PL_DDR);
++    entry->data = alloc_vmpages(FLASH_PG_SIZE >> ARCH_PG_SHIFT, ZONE_PS_DDR);
+     if (!entry->data) {
+         SLABFREE(entry);
+         return ENOMEM;

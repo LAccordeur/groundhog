@@ -1,0 +1,226 @@
+diff --git a/src/dbgcon.c b/src/dbgcon.c
+index 9a11564..a78e5f2 100644
+--- a/src/dbgcon.c
++++ b/src/dbgcon.c
+@@ -1,27 +1,110 @@
+ #include <string.h>
+ 
+ #include "proto.h"
++#include <utils.h>
++
++#define ARG_MAX 10
++
++typedef void (*console_command_handler_t)(int argc, const char** argv);
++
++struct console_command {
++    const char* name;
++    console_command_handler_t handler;
++};
+ 
+ void worker_report_stats(void);
++static void report_stats(int argc, const char** argv);
++static void sync_command(int argc, const char** argv);
++
++static struct console_command command_list[] = {
++    {"report", report_stats},
++    {"dump_profile", profile_dump},
++    {"sync", sync_command},
++    {"mark_bad", bm_command_mark_bad},
++    {"save_bad", bm_command_save_bad},
++};
+ 
+-static void report_stats(void)
++static struct console_command* get_command(const char* name)
++{
++    int i;
++
++    for (i = 0; i < sizeof(command_list) / sizeof(0 [command_list]); i++) {
++        struct console_command* cmd = &command_list[i];
++
++        if (!strcmp(cmd->name, name)) return cmd;
++    }
++
++    return NULL;
++}
++
++static void report_stats(int argc, const char** argv)
+ {
+     ftl_report_stats();
+     worker_report_stats();
+ }
+ 
++static void sync_command(int argc, const char** argv) { bm_shutdown(); }
++
++static int parse_args(const u8* buf, size_t count, const char** argv,
++                      int max_argc)
++{
++    static char cmdline[256];
++    int argc;
++    char* p;
++    int beginning;
++
++    if (count >= sizeof(cmdline)) return -1;
++
++    memcpy(cmdline, buf, count);
++    cmdline[count] = '\0';
++
++    p = cmdline;
++    argc = 0;
++    beginning = TRUE;
++
++    while (*p) {
++        if (*p == ' ' || *p == '\n' || *p == '\r') {
++            *p++ = '\0';
++            beginning = TRUE;
++            continue;
++        }
++
++        if (beginning) {
++            if (argc >= max_argc) return -1;
++            argv[argc++] = p;
++            beginning = FALSE;
++        }
++
++        p++;
++    }
++
++    return argc;
++}
++
+ static void handle_input(const u8* buf, size_t count)
+ {
+-    while (count > 0 && (buf[count - 1] == '\n' || buf[count - 1] == '\r'))
+-        count--;
+-
+-    if (count == 6 && !memcmp(buf, "report", count)) {
+-        report_stats();
+-    } else if (count == 12 && !memcmp(buf, "dump_profile", count)) {
+-        profile_dump();
+-    } else if (count == 4 && !memcmp(buf, "sync", count)) {
+-        bm_shutdown();
++    const char* argv[ARG_MAX];
++    struct console_command* cmd;
++    int argc;
++
++    argc = parse_args(buf, count, argv, ARG_MAX);
++    if (argc < 0) {
++        printk("Command line or argument list too long\n");
++        return;
++    }
++
++    if (argc == 0) {
++        printk("Empty command line\n");
++        return;
+     }
++
++    cmd = get_command(argv[0]);
++    if (!cmd) {
++        printk("Command '%s' not recognized\n", argv[0]);
++        return;
++    }
++
++    cmd->handler(argc, argv);
+ }
+ 
+ void dbgcon_setup(void) { uart_set_recv_data_handler(handle_input); }
+diff --git a/src/ftl/block_manager.c b/src/ftl/block_manager.c
+index e738414..f12601d 100644
+--- a/src/ftl/block_manager.c
++++ b/src/ftl/block_manager.c
+@@ -14,6 +14,7 @@
+ 
+ #include <errno.h>
+ #include <stddef.h>
++#include <stdlib.h>
+ 
+ #define NAME "[BM]"
+ 
+@@ -64,6 +65,7 @@ static inline struct plane_allocator* get_plane(struct flash_address* addr)
+ static inline struct block_data* get_block_data(struct plane_allocator* plane,
+                                                 unsigned int block_id)
+ {
++    Xil_AssertNonvoid(block_id < BLOCKS_PER_PLANE);
+     return &plane->blocks[block_id];
+ }
+ 
+@@ -396,6 +398,14 @@ void bm_invalidate_page(struct flash_address* addr)
+     SET_BIT(block->invalid_page_bitmap, addr->page);
+ }
+ 
++void bm_mark_bad(struct flash_address* addr)
++{
++    struct plane_allocator* plane = get_plane(addr);
++    struct block_data* block = get_block_data(plane, addr->block);
++
++    block->flags |= BF_BAD;
++}
++
+ static void scan_bad_blocks(int full)
+ {
+     int i, j, k, l, b, r;
+@@ -758,3 +768,30 @@ void bm_report_stats(void)
+ 
+     xil_printf("=============================================\n");
+ }
++
++void bm_command_mark_bad(int argc, const char** argv)
++{
++    struct flash_address addr;
++
++    if (argc != 6) {
++        printk("Invalid number of arguments\n");
++    }
++
++    addr.channel = atoi(argv[1]);
++    addr.chip = atoi(argv[2]);
++    addr.die = atoi(argv[3]);
++    addr.plane = atoi(argv[4]);
++    addr.block = atoi(argv[5]);
++
++    bm_mark_bad(&addr);
++
++    printk("Marked ch%d w%d d%d p%d b%d as bad block\n", addr.channel,
++           addr.chip, addr.die, addr.plane, addr.block);
++}
++
++void bm_command_save_bad(int argc, const char** argv)
++{
++    printk("Saving bad block list ...");
++    save_bad_blocks();
++    printk("OK\n");
++}
+diff --git a/src/profile.c b/src/profile.c
+index eae1e39..b877a6c 100644
+--- a/src/profile.c
++++ b/src/profile.c
+@@ -14,7 +14,7 @@ void profile_init(void)
+         ioremap_nc((phys_addr_t)PROFILE_BUF_START, PROFILE_BUF_SIZE);
+ }
+ 
+-void profile_dump(void)
++void profile_dump(int argc, const char** argv)
+ {
+     unsigned int mem_used = prof_sample_buf->mem_used;
+     int i;
+diff --git a/src/proto.h b/src/proto.h
+index d116edd..92d17c0 100644
+--- a/src/proto.h
++++ b/src/proto.h
+@@ -27,6 +27,8 @@ void bm_alloc_page(unsigned int nsid, struct flash_address* addr, int for_gc,
+                    int for_mapping);
+ void bm_invalidate_page(struct flash_address* addr);
+ void bm_report_stats(void);
++void bm_command_mark_bad(int argc, const char** argv);
++void bm_command_save_bad(int argc, const char** argv);
+ 
+ /* data_cache.c */
+ void dc_init(size_t capacity);
+@@ -106,7 +108,7 @@ void cpulocals_init(void);
+ 
+ /* profile.c */
+ void profile_init(void);
+-void profile_dump(void);
++void profile_dump(int argc, const char** argv);
+ 
+ /* zdma.c */
+ int zdma_setup(void);

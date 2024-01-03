@@ -1,0 +1,83 @@
+diff --git a/src/ftl/data_cache.c b/src/ftl/data_cache.c
+index e53b08c..4af0b1d 100644
+--- a/src/ftl/data_cache.c
++++ b/src/ftl/data_cache.c
+@@ -235,7 +235,7 @@ static int cache_add(struct data_cache* cache, unsigned int nsid, lpa_t lpa,
+     mutex_init(&entry->mutex, &mutex_attr);
+ 
+     /* Allocate data buffer for the entry. Prefer PL DDR. */
+-    entry->data = alloc_vmpages(FLASH_PG_SIZE >> ARCH_PG_SHIFT, ZONE_PL_DDR);
++    entry->data = alloc_vmpages(FLASH_PG_SIZE >> ARCH_PG_SHIFT, ZONE_PS_DDR);
+     if (!entry->data) {
+         SLABFREE(entry);
+         return ENOMEM;
+@@ -398,6 +398,9 @@ static int write_buffers(struct user_request* req, int write_zeroes)
+         iov->iov_base = entry->data + txn->offset;
+         iov->iov_len = txn->length;
+ 
++        dma_sync_single_for_device(iov->iov_base, iov->iov_len,
++                                   DMA_FROM_DEVICE);
++
+         if (write_zeroes) memset(iov->iov_base, 0, iov->iov_len);
+ 
+ #else
+@@ -476,6 +479,9 @@ cleanup:
+         struct cache_entry* entry = (struct cache_entry*)txn->opaque;
+         struct data_cache* cache = get_cache_for_txn(txn);
+ 
++        dma_sync_single_for_cpu(entry->data + txn->offset, txn->length,
++                                DMA_FROM_DEVICE);
++
+         /* Reset entry status on failure. */
+         if (r != 0) {
+             entry->status = CES_EMPTY;
+@@ -576,6 +582,7 @@ static int handle_cached_read(struct user_request* req)
+ 
+         iov->iov_base = txn->data + txn->offset;
+         iov->iov_len = txn->length;
++        dma_sync_single_for_device(iov->iov_base, iov->iov_len, DMA_TO_DEVICE);
+ 
+         iov++;
+         i++;
+@@ -615,7 +622,7 @@ static int handle_cached_read(struct user_request* req)
+             iov_iter_init(&copy_iter, &copy_iov[txn->offset >> SECTOR_SHIFT],
+                           txn->length >> SECTOR_SHIFT, txn->length);
+             copied_bytes = zdma_iter_copy_to(
+-                &copy_iter, entry->data + txn->offset, txn->length, FALSE);
++                &copy_iter, entry->data + txn->offset, txn->length, TRUE);
+ 
+             if (copied_bytes < 0) {
+                 r = -copied_bytes;
+@@ -640,6 +647,9 @@ cleanup:
+         struct cache_entry* entry = (struct cache_entry*)txn->opaque;
+         struct data_cache* cache = get_cache_for_txn(txn);
+ 
++        dma_sync_single_for_cpu(entry->data + txn->offset, txn->length,
++                                DMA_TO_DEVICE);
++
+         /* Cache hit. Release the lock now. */
+         mutex_unlock(&entry->mutex);
+         unpin_entry(cache, entry);
+diff --git a/src/zdma.c b/src/zdma.c
+index eac58e2..52d412c 100644
+--- a/src/zdma.c
++++ b/src/zdma.c
+@@ -230,7 +230,7 @@ ssize_t zdma_iter_copy_from(struct iov_iter* iter, void* buf, size_t bytes,
+     unsigned long flags;
+     int r = 0;
+ 
+-    if (bytes < ZDMA_SIZE_THRESHOLD)
++    if (bytes < ZDMA_SIZE_THRESHOLD && !sync_cache)
+         return iov_iter_copy_from(iter, buf, bytes);
+ 
+     chan = allocate_channel();
+@@ -335,7 +335,8 @@ ssize_t zdma_iter_copy_to(struct iov_iter* iter, const void* buf, size_t bytes,
+     unsigned long flags;
+     int r = 0;
+ 
+-    if (bytes < ZDMA_SIZE_THRESHOLD) return iov_iter_copy_to(iter, buf, bytes);
++    if (bytes < ZDMA_SIZE_THRESHOLD && !sync_cache)
++        return iov_iter_copy_to(iter, buf, bytes);
+ 
+     chan = allocate_channel();
+     Xil_AssertNonvoid(chan != NULL);

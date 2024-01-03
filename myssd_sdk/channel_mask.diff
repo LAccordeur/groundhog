@@ -1,0 +1,99 @@
+diff --git a/include/flash_config.h b/include/flash_config.h
+index cf04c40..bba5a17 100644
+--- a/include/flash_config.h
++++ b/include/flash_config.h
+@@ -32,6 +32,7 @@
+ 
+ #endif
+ 
++#define CHANNEL_ENABLE_MASK       0b11101111
+ #define CHIPS_ENABLED_PER_CHANNEL CHIPS_PER_CHANNEL
+ 
+ /* #define ENABLE_MULTIPLANE */
+diff --git a/include/storpu/symbols.h b/include/storpu/symbols.h
+index 57077d8..1b8e64b 100644
+--- a/include/storpu/symbols.h
++++ b/include/storpu/symbols.h
+@@ -7,6 +7,7 @@
+ /* clang-format off */
+ #define _SYM_LIST                                               \
+     _SYM("spu_printf", printk),                                 \
++        _SYM("printf", printk),                                 \
+         _SYM("sys_brk", sys_brk),                               \
+         _SYM("sys_mmap", sys_mmap),                             \
+         _SYM("sys_munmap", sys_munmap),                         \
+diff --git a/src/ftl/amu.c b/src/ftl/amu.c
+index 7162272..7beebca 100644
+--- a/src/ftl/amu.c
++++ b/src/ftl/amu.c
+@@ -580,13 +580,30 @@ static void assign_plane(struct am_domain* domain,
+     struct flash_address* addr = &txn->addr;
+     lpa_t lpa = txn->lpa;
+ 
+-    static const unsigned int channel_count = NR_CHANNELS;
++    unsigned int channel_count;
+     static const unsigned int chip_count = CHIPS_ENABLED_PER_CHANNEL;
+     static const unsigned int die_count = DIES_PER_CHIP;
+     static const unsigned int plane_count = PLANES_PER_DIE;
+ 
++    static unsigned int enable_channels[NR_CHANNELS];
++    static unsigned int num_enable_channels = 0;
++
+     Xil_AssertVoid(domain);
+ 
++    if (!num_enable_channels) {
++        int i;
++
++        for (i = 0; i < NR_CHANNELS; i++) {
++            if (CHANNEL_ENABLE_MASK & (1 << i))
++                enable_channels[num_enable_channels++] = i;
++        }
++
++        Xil_AssertVoid(num_enable_channels > 0);
++        Xil_AssertVoid(num_enable_channels <= NR_CHANNELS);
++    }
++
++    channel_count = num_enable_channels;
++
+ #define ASSIGN_PHYS_ADDR(lpa, name)        \
+     do {                                   \
+         addr->name = (lpa) % name##_count; \
+@@ -681,6 +698,9 @@ static void assign_plane(struct am_domain* domain,
+ #undef ASSIGN_PLANE
+ #undef ASSIGN_PHYS_ADDR
+ 
++    Xil_AssertVoid(addr->channel < num_enable_channels);
++    addr->channel = enable_channels[addr->channel];
++
+     Xil_AssertVoid(addr->channel < NR_CHANNELS);
+     Xil_AssertVoid(addr->chip < CHIPS_PER_CHANNEL);
+     Xil_AssertVoid(addr->die < DIES_PER_CHIP);
+diff --git a/src/ftl/ftl.c b/src/ftl/ftl.c
+index 05a6d65..f735328 100644
+--- a/src/ftl/ftl.c
++++ b/src/ftl/ftl.c
+@@ -201,19 +201,20 @@ static void ftl_sync(void)
+ {
+     int i, r;
+ 
++    xil_printf(NAME " Saving metadata for namespace ");
++
+     for (i = 0; i < NAMESPACE_MAX; i++) {
+         unsigned int nsid = IDX2NSID(i);
+ 
+         if (!GET_BIT(manifest.active_namespace, i)) continue;
+ 
+-        xil_printf(NAME " Saving data cache for namespace %d ...", nsid);
++        xil_printf("%d...", nsid);
+         dc_flush_ns(nsid);
+-        xil_printf("OK\n");
+ 
+-        xil_printf(NAME " Saving AM domain for namespace %d ...", nsid);
+         r = amu_save_domain(nsid);
+-        xil_printf("%s\n", r ? "FAILED" : "OK");
++        xil_printf("%s", r ? "FAILED " : "OK ");
+     }
++    xil_printf("\n");
+ 
+     bm_shutdown();
+     save_manifest();
