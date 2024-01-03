@@ -1,0 +1,3 @@
+[submodule "groundhog-host/test/googletest"]
+	path = groundhog-host/test/googletest
+	url = https://github.com/google/googletest.git
