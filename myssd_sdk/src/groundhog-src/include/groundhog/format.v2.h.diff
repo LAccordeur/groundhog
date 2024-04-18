@@ -1,0 +1,22 @@
+diff --git a/include/groundhog/traj_block_format.h b/include/groundhog/traj_block_format.h
+index dc2aee2..77b604f 100644
+--- a/include/groundhog/traj_block_format.h
++++ b/include/groundhog/traj_block_format.h
+@@ -5,6 +5,8 @@
+ #ifndef TRAJ_BLOCK_FORMAT_TRAJ_BLOCK_FORMAT_H
+ #define TRAJ_BLOCK_FORMAT_TRAJ_BLOCK_FORMAT_H
+ 
++#define MY_OID_FILTER_SIZE 16
++
+ struct traj_point {
+     int oid;
+     int timestamp_sec;
+@@ -21,6 +23,8 @@ struct seg_meta {
+     int time_max;
+     int seg_offset;
+     int seg_size;
++    char oid_filter[MY_OID_FILTER_SIZE];
++    int oid_filter_size;
+ };
+ 
+ struct traj_block_header {

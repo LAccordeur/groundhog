@@ -10,7 +10,7 @@ The whole codebase relies on a specific hardware platform to run. Here, we intro
 - The experiment codes: [`groundhog-host/src/groundhog/exp/exp_native_host_and_device.c`](https://github.com/LAccordeur/groundhog/tree/main/groundhog-host/src/groundhog/exp/exp_native_host_and_device.c).
 
 ## myssd_sdk
-The code of ISC query engine is in the directory [`myssd_sdk/src/groundhog-src`](https://github.com/LAccordeur/groundhog/tree/main/myssd_sdk/src/groundhog-src).
+The code of ISC query engine is in the directory [`myssd_sdk/src/groundhog-src/src/groundhog/isp_query_engine.c`](https://github.com/LAccordeur/groundhog/tree/main/myssd_sdk/src/groundhog-src/src/groundhog/isp_query_engine.c).
 
 We extend the FTL to support the offloading:
   - Fetch the ISC descriptors from the host memory: [`process_io_request`](https://github.com/LAccordeur/groundhog/blob/main/myssd_sdk/src/ftl/ftl.c#L232)
