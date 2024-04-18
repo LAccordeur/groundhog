@@ -1,5 +1,5 @@
 //
-// Created by yangguo on 11/11/22.
+// Created by authors on 11/11/22.
 //
 #include <string.h>
 #include <stdio.h>
