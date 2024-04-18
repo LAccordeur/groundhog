@@ -1,5 +1,5 @@
 //
-// Created by yangguo on 23-2-7.
+// Created by authors on 23-2-7.
 //
 // compare performance between host computation and in-storage-computing
 // to get the cross-point which tell us when in-storage-computing is better
@@ -19,7 +19,7 @@ static void ingest_and_flush_porto_data(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Dataset/trajectory/porto_data_v2.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -45,7 +45,7 @@ static void ingest_and_flush_porto_data_10x(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_data_v2_10x.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_data_v2_10x.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -71,7 +71,7 @@ static void ingest_and_flush_porto_data_zcurve(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Dataset/trajectory/porto_data_v2.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -98,7 +98,7 @@ static void ingest_and_flush_porto_data_zcurve_segment_num(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2_24million.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Dataset/trajectory/porto_data_v2_24million.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -125,7 +125,7 @@ static void ingest_and_flush_porto_data_10x_zcurve(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_data_v2_10x.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_data_v2_10x.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -151,7 +151,7 @@ static void ingest_and_flush_nyc_data(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Dataset/nyctaxi/pickup_trip_data_2010_2013_full_v1.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Dataset/nyctaxi/pickup_trip_data_2010_2013_full_v1.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -177,7 +177,7 @@ static void ingest_and_flush_nyc_data_zcurve(int data_block_num) {
 
     //int data_block_num = 1024;
 
-    FILE *data_fp = fopen("/home/yangguo/Dataset/nyctaxi/pickup_trip_data_2010_2013_full_v1.csv", "r");
+    FILE *data_fp = fopen("/home/authors/Dataset/nyctaxi/pickup_trip_data_2010_2013_full_v1.csv", "r");
     // ingest data
     struct simple_query_engine query_engine;
     struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
@@ -912,7 +912,7 @@ static void run_on_porto_data_multithread_batch() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/traj-block-format/queryfile/groundhog_3000w_st_7d_1.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/traj-block-format/queryfile/groundhog_3000w_st_7d_1.query", "r");
     // read queries
     int query_num = 10;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -959,7 +959,7 @@ static void run_on_porto_data_id_temporal_multithread_batch() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/traj-block-format/queryfile/groundhog_3000w_id_30d.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/traj-block-format/queryfile/groundhog_3000w_id_30d.query", "r");
     // read queries
     int query_num = 50;
     struct id_temporal_predicate **predicates = allocate_id_temporal_predicate_mem(query_num);
@@ -1562,7 +1562,7 @@ void exp_spatio_temporal_query_porto_scan() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_1.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_1.query", "r");
     // read queries
     int query_num = 4;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1610,7 +1610,7 @@ void exp_spatio_temporal_query_porto_scan_segment_num() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_1.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_1.query", "r");
     // read queries
     int query_num = 20;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1663,7 +1663,7 @@ void exp_spatio_temporal_query_porto_index_scan() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_005.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_005.query", "r");
     // read queries
     int query_num = 4;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1711,7 +1711,7 @@ void exp_spatio_temporal_query_porto_index_scan_low_selectivity_add_host_io_opt(
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_005.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_005.query", "r");
     // read queries
     int query_num = 20;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1769,7 +1769,7 @@ void exp_spatio_temporal_query_porto_index_scan_segment_num() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_005.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_005.query", "r");
     // read queries
     int query_num = 20;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1823,7 +1823,7 @@ void exp_spatio_temporal_query_porto_index_scan_query_type() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_st_1.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_st_1.query", "r");
     // read queries
     int query_num = 6;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1871,8 +1871,8 @@ void exp_spatio_temporal_query_nyc_scan() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    //FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/nyc_st_1.query", "r");
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/nyc_st_05.query", "r");
+    //FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/nyc_st_1.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/nyc_st_05.query", "r");
     // read queries
     int query_num = 10;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1928,7 +1928,7 @@ void exp_spatio_temporal_query_nyc_index_scan() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/nyc_st_005.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/nyc_st_005.query", "r");
     // read queries
     int query_num = 6;
     struct spatio_temporal_range_predicate **predicates = allocate_spatio_temporal_predicate_mem(query_num);
@@ -1973,7 +1973,7 @@ void exp_id_temporal_query_porto() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_id.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_id.query", "r");
     // read queries
     int query_num = 2;
     struct id_temporal_predicate **predicates = allocate_id_temporal_predicate_mem(query_num);
@@ -2024,7 +2024,7 @@ void exp_id_temporal_query_nyc() {
 
     rebuild_query_engine_from_file(&rebuild_engine);
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/nyc_id.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/nyc_id.query", "r");
     // read queries
     int query_num = 2;
     struct id_temporal_predicate **predicates = allocate_id_temporal_predicate_mem(query_num);
@@ -2223,7 +2223,7 @@ void exp_spatio_temporal_knn_query_porto_scan() {
     struct spatio_temporal_knn_predicate *predicate_ptr = NULL;
 
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_knn_k50.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_knn_k50.query", "r");
     // read queries
     //int query_num = 100;
     int query_num = 20;
@@ -2309,7 +2309,7 @@ void exp_spatio_temporal_knn_query_porto_scan_add_host_io_opt() {
     struct spatio_temporal_knn_predicate *predicate_ptr = NULL;
 
 
-    FILE *query_fp = fopen("/home/yangguo/Codes/groundhog/query-workload/porto_knn_k90.query", "r");
+    FILE *query_fp = fopen("/home/authors/Codes/groundhog/query-workload/porto_knn_k90.query", "r");
     // read queries
     int query_num = 100;
     //int query_num = 20;
