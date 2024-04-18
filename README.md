@@ -4,10 +4,10 @@ There are three parts in Groundhog project.
 - **myssd_sdk**: this directory contains the FTL code running inside the CSD. We extend the FTL to support the offloading procedure and the computation of spatio-temporal queries.
 - **spdk**: this directory is forked from spdk library. We extend the NVMe to support the ISC command.
 
-The whole codebase relies on a specific hardware platform to run, which is difficult to be provided here. Here, we only introduce several major contents in each parts.
+The whole codebase relies on a specific hardware platform to run. Here, we introduce several major contents in each parts.
 ## groundhog-host
 - The code of the format library: [`groundhog-host/src/groundhog/traj_block_format.c`](https://github.com/LAccordeur/groundhog/blob/main/groundhog-host/src/groundhog/traj_block_format.c).
-- The experiment codes: [`groundhog-host/src/groundhog/exp`](https://github.com/LAccordeur/groundhog/tree/main/groundhog-host/src/groundhog/exp).
+- The experiment codes: [`groundhog-host/src/groundhog/exp/exp_native_host_and_device.c`](https://github.com/LAccordeur/groundhog/tree/main/groundhog-host/src/groundhog/exp/exp_native_host_and_device.c).
 
 ## myssd_sdk
 The code of ISC query engine is in the directory [`myssd_sdk/src/groundhog-src`](https://github.com/LAccordeur/groundhog/tree/main/myssd_sdk/src/groundhog-src).

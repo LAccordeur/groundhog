@@ -13,7 +13,7 @@ struct callback_sequence {
     struct ns_entry *ns_entry;
     char *buf;  // buf used by spdk and use its spdk_zmalloc
     char *application_read_buf;
-    int application_read_buf_size;
+    unsigned int application_read_buf_size;
     int is_completed;
 };
 
@@ -59,7 +59,7 @@ void init_and_mk_fs_for_traj(bool is_flushed) {
 
 void spdk_flush_static_fs_meta_for_traj() {
     spdk_flush_static_fs_meta(&spdk_static_fs_layer_for_traj);
-    cleanup_spdk_nvme_driver(&spdk_driver_desc);
+    //cleanup_spdk_nvme_driver(&spdk_driver_desc);
 }
 
 void print_spdk_static_fs_meta_for_traj() {
@@ -436,8 +436,8 @@ size_t spdk_static_fs_fwrite(const void *data_ptr, size_t size, struct spdk_stat
     sequence.buf = spdk_buffer_ptr;
 
     int rc;
-    int lba_start = file_desc->start_lba + file_desc->current_write_offset;
-    int sector_count;
+    unsigned int lba_start = file_desc->start_lba + file_desc->current_write_offset;
+    unsigned int sector_count;
     if (size % SECTOR_SIZE == 0) {
         sector_count = size / SECTOR_SIZE;
     } else {
@@ -495,8 +495,8 @@ size_t spdk_static_fs_fread(const void *data_ptr, size_t size, struct spdk_stati
     sequence.application_read_buf_size = size;
 
     int rc;
-    int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-    int sector_count;
+    unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+    unsigned int sector_count;
     if (size % SECTOR_SIZE == 0) {
         sector_count = size / SECTOR_SIZE;
     } else {
@@ -537,7 +537,7 @@ size_t spdk_static_fs_fread_batch(int batch_size, const void **data_ptr_vec, con
 
     struct ns_entry *ns_entry = file_desc->fs_desc->driver_desc->ns_entry;
 
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     struct callback_sequence sequences[batch_size];
 
     for (int i = 0; i < batch_size; i++) {
@@ -561,8 +561,8 @@ size_t spdk_static_fs_fread_batch(int batch_size, const void **data_ptr_vec, con
 
 
         int rc;
-        int lba_start = file_desc->start_lba + logical_sector_start[i];
-        int sector_count;
+        unsigned int lba_start = file_desc->start_lba + logical_sector_start[i];
+        unsigned int sector_count;
         if (size_vec[i] % SECTOR_SIZE == 0) {
             sector_count = size_vec[i] / SECTOR_SIZE;
         } else {
@@ -607,7 +607,7 @@ size_t spdk_static_fs_fread_batch(int batch_size, const void **data_ptr_vec, con
 size_t spdk_static_fs_fread_multi_addr(const void *data_ptr, size_t size, struct spdk_static_file_desc *file_desc, struct isp_descriptor *isp_desc) {
 
     // check the number of sector (should be less than or equal to 256)
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     for (int i = 0; i < isp_desc->lba_count; i++) {
         total_sector_count += isp_desc->lba_array[i].sector_count;
     }
@@ -636,8 +636,8 @@ size_t spdk_static_fs_fread_multi_addr(const void *data_ptr, size_t size, struct
     sequence.application_read_buf_size = size;
 
     int rc;
-    int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-    int sector_count;
+    unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+    unsigned int sector_count;
     if (size % SECTOR_SIZE == 0) {
         sector_count = size / SECTOR_SIZE;
     } else {
@@ -674,7 +674,7 @@ size_t spdk_static_fs_fread_multi_addr(const void *data_ptr, size_t size, struct
 size_t spdk_static_fs_fread_isp(const void *data_ptr, size_t size, struct spdk_static_file_desc *file_desc, struct isp_descriptor *isp_desc) {
 
     // check the number of sector (should be less than or equal to 256)
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     for (int i = 0; i < isp_desc->lba_count; i++) {
         total_sector_count += isp_desc->lba_array[i].sector_count;
     }
@@ -703,8 +703,8 @@ size_t spdk_static_fs_fread_isp(const void *data_ptr, size_t size, struct spdk_s
     sequence.application_read_buf_size = size;
 
     int rc;
-    int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-    int sector_count;
+    unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+    unsigned int sector_count;
     if (size % SECTOR_SIZE == 0) {
         sector_count = size / SECTOR_SIZE;
     } else {
@@ -740,7 +740,7 @@ size_t spdk_static_fs_fread_isp(const void *data_ptr, size_t size, struct spdk_s
 size_t spdk_static_fs_fread_isp_fpga(const void *data_ptr, size_t size, struct spdk_static_file_desc *file_desc, struct isp_descriptor *isp_desc) {
 
     // check the number of sector (should be less than or equal to 256)
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     for (int i = 0; i < isp_desc->lba_count; i++) {
         total_sector_count += isp_desc->lba_array[i].sector_count;
     }
@@ -769,8 +769,8 @@ size_t spdk_static_fs_fread_isp_fpga(const void *data_ptr, size_t size, struct s
     sequence.application_read_buf_size = size;
 
     int rc;
-    int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-    int sector_count;
+    unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+    unsigned int sector_count;
     if (size % SECTOR_SIZE == 0) {
         sector_count = size / SECTOR_SIZE;
     } else {
@@ -831,13 +831,13 @@ size_t spdk_static_fs_fread_multi_addr_batch(int batch_size, const void **data_p
 
     struct ns_entry *ns_entry = file_desc->fs_desc->driver_desc->ns_entry;
 
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     struct callback_sequence sequences[batch_size];
     for (int i = 0; i < batch_size; i++) {
         sequences[i].is_completed = 0;
         sequences[i].ns_entry = ns_entry;
 
-        int size = size_vec[i];
+        unsigned int size = size_vec[i];
         size_t spdk_buffer_size = size;
         if (size % 0x1000 != 0) {
             spdk_buffer_size = ((size / 0x1000) + 1) * 0x1000;
@@ -853,8 +853,8 @@ size_t spdk_static_fs_fread_multi_addr_batch(int batch_size, const void **data_p
         sequences[i].application_read_buf_size = size;
 
         int rc;
-        int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-        int sector_count;
+        unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+        unsigned int sector_count;
         if (size % SECTOR_SIZE == 0) {
             sector_count = size / SECTOR_SIZE;
         } else {
@@ -910,13 +910,13 @@ size_t spdk_static_fs_fread_hybrid_comp_batch(struct spdk_static_file_desc *file
 
     struct ns_entry *ns_entry = file_desc->fs_desc->driver_desc->ns_entry;
 
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     struct callback_sequence sequences[host_batch_size];
     for (int i = 0; i < host_batch_size; i++) {
         sequences[i].is_completed = 0;
         sequences[i].ns_entry = ns_entry;
 
-        int size = host_size_vec[i];
+        unsigned int size = host_size_vec[i];
         size_t spdk_buffer_size = size;
         if (size % 0x1000 != 0) {
             spdk_buffer_size = ((size / 0x1000) + 1) * 0x1000;
@@ -932,8 +932,8 @@ size_t spdk_static_fs_fread_hybrid_comp_batch(struct spdk_static_file_desc *file
         sequences[i].application_read_buf_size = size;
 
         int rc;
-        int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-        int sector_count;
+        unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+        unsigned int sector_count;
         if (size % SECTOR_SIZE == 0) {
             sector_count = size / SECTOR_SIZE;
         } else {
@@ -990,13 +990,13 @@ size_t spdk_static_fs_fread_isp_batch(int batch_size, const void **data_ptr_vec,
 
     struct ns_entry *ns_entry = file_desc->fs_desc->driver_desc->ns_entry;
 
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     struct callback_sequence sequences[batch_size];
     for (int i = 0; i < batch_size; i++) {
         sequences[i].is_completed = 0;
         sequences[i].ns_entry = ns_entry;
 
-        int size = size_vec[i];
+        unsigned int size = size_vec[i];
         size_t spdk_buffer_size = size;
         if (size % 0x1000 != 0) {
             spdk_buffer_size = ((size / 0x1000) + 1) * 0x1000;
@@ -1012,8 +1012,8 @@ size_t spdk_static_fs_fread_isp_batch(int batch_size, const void **data_ptr_vec,
         sequences[i].application_read_buf_size = size;
 
         int rc;
-        int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-        int sector_count;
+        unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+        unsigned int sector_count;
         if (size % SECTOR_SIZE == 0) {
             sector_count = size / SECTOR_SIZE;
         } else {
@@ -1073,7 +1073,7 @@ size_t spdk_static_fs_fread_isp_fpga_batch(int batch_size, const void **data_ptr
 
     struct ns_entry *ns_entry = file_desc->fs_desc->driver_desc->ns_entry;
 
-    int total_sector_count = 0;
+    unsigned int total_sector_count = 0;
     struct callback_sequence sequences[batch_size];
     for (int i = 0; i < batch_size; i++) {
         sequences[i].is_completed = 0;
@@ -1095,8 +1095,8 @@ size_t spdk_static_fs_fread_isp_fpga_batch(int batch_size, const void **data_ptr
         sequences[i].application_read_buf_size = size;
 
         int rc;
-        int lba_start = file_desc->start_lba + file_desc->current_read_offset;
-        int sector_count;
+        unsigned int lba_start = file_desc->start_lba + file_desc->current_read_offset;
+        unsigned int sector_count;
         if (size % SECTOR_SIZE == 0) {
             sector_count = size / SECTOR_SIZE;
         } else {
@@ -1138,7 +1138,7 @@ size_t spdk_static_fs_fseek(struct spdk_static_file_desc *file_desc, long long o
     if (offset / SECTOR_SIZE > INT32_MAX) {
         printf("too large offset in spdk fseek\n");
     }
-    int sector_offset = offset / SECTOR_SIZE;
+    unsigned int sector_offset = offset / SECTOR_SIZE;
     file_desc->current_read_offset = sector_offset;
     return sector_offset * SECTOR_SIZE;
 }

@@ -78,7 +78,8 @@ add_library(traj_block_format
         include/groundhog/bloom/bloom.h
         include/groundhog/bloom/hashf.h
         include/groundhog/nyc_dataset_reader.h
-        )
+        include/groundhog/knn_util.h src/groundhog/knn_util.c
+        include/groundhog/osm_dataset_reader.h src/groundhog/osm_dataset_reader.c src/common_util.c)
 
 
 add_executable(mymain src/groundhog/mymain.c)
@@ -117,7 +118,7 @@ target_link_libraries(pre_spdk_read ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-bui
 add_executable(pre_spdk_read_multithread src/groundhog/exp/pre_spdk_read_multithread.c)
 target_link_libraries(pre_spdk_read_multithread ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
 
-add_executable(exp_cost_model src/groundhog/exp/exp_cost_model.c)
+add_executable(exp_cost_model src/groundhog/exp/exp_cost_model.c src/common_util.c)
 target_link_libraries(exp_cost_model ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
 
 add_executable(exp_native_host_and_device_large src/groundhog/exp/exp_native_host_and_device_large.c)

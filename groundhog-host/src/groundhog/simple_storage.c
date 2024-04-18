@@ -75,6 +75,13 @@ void fetch_traj_data_via_logical_pointer(struct traj_storage *storage, int logic
     //debug_print("[fetch_traj_data_via_logical_pointer] fetch block [%d] from file [%s] to memory [%p]\n", logical_pointer, my_fp->filename, destination);
 }
 
+/**
+ * param address information via @param block_logical_pointer_start and @param block_num
+ * @param storage
+ * @param block_logical_pointer_start
+ * @param block_num
+ * @param destination
+ */
 void fetch_continuous_traj_data_block(struct traj_storage *storage, int block_logical_pointer_start, int block_num, void* destination) {
     int fs_mode = storage->my_fp->fs_mode;
     struct my_file *my_fp = storage->my_fp;
@@ -110,6 +117,14 @@ void fetch_continuous_traj_data_block(struct traj_storage *storage, int block_lo
 
 }
 
+/**
+ * param address information via @param block_logical_pointer_start and @param block_num
+ * @param batch_size
+ * @param storage
+ * @param block_logical_pointer_start
+ * @param block_num
+ * @param destination
+ */
 void fetch_continuous_traj_data_block_spdk_batch(int batch_size, struct traj_storage *storage, int *block_logical_pointer_start, int *block_num, void **destination) {
     int fs_mode = storage->my_fp->fs_mode;
     struct my_file *my_fp = storage->my_fp;
@@ -125,6 +140,7 @@ void fetch_continuous_traj_data_block_spdk_batch(int batch_size, struct traj_sto
         }
         long long my_offset = TRAJ_BLOCK_SIZE * (long long) block_logical_pointer_start[0];
         my_fseek(my_fp, my_offset, fs_mode);
+        // the sector count should not exceed the limit in FTL (256)
         my_fread_spdk_batch(batch_size, destination, logical_sector_start, size_vec, my_fp);
 
     } else {
@@ -133,6 +149,13 @@ void fetch_continuous_traj_data_block_spdk_batch(int batch_size, struct traj_sto
 
 }
 
+/**
+ * pass address info via @param isp_desc
+ * @param storage
+ * @param result_buffer
+ * @param result_size
+ * @param isp_desc
+ */
 void do_isp_for_trajectory_data_without_comp(struct traj_storage *storage, void* result_buffer, size_t result_size, struct isp_descriptor *isp_desc) {
     int fs_mode = storage->my_fp->fs_mode;
     if (fs_mode == SPDK_FS_MODE) {
@@ -203,7 +226,7 @@ void flush_traj_storage(struct traj_storage *storage) {
         memcpy(buffer + buffer_offset * TRAJ_BLOCK_SIZE, block_ptr, TRAJ_BLOCK_SIZE);
 
         if ((i+1) % batch_block_size == 0) {
-            my_fseek(fp, i * TRAJ_BLOCK_SIZE, fs_mode);
+            my_fseek(fp, i * TRAJ_BLOCK_SIZE, fs_mode); // no effect for spdk fs, our spdk fs is append-write
             int result_size = my_fwrite(buffer, batch_block_size, TRAJ_BLOCK_SIZE, fp, fs_mode);
             if (result_size > 0) {
                 count+=batch_block_size;
@@ -218,7 +241,7 @@ void flush_traj_storage(struct traj_storage *storage) {
         int block_num = (storage->current_index + 1) % batch_block_size;
         my_fseek(fp, file_offset * TRAJ_BLOCK_SIZE, fs_mode);
         my_fwrite(buffer, block_num, TRAJ_BLOCK_SIZE, fp, fs_mode);
-        count + block_num;
+        count += block_num;
     }
     free(buffer);
 

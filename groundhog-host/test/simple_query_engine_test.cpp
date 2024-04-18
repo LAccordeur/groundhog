@@ -30,7 +30,7 @@ TEST(queryenginetest, init) {
 
 TEST(queryenginetest, ingest) {
 
-    char filename[] = "/home/yangguo/Data/DataSet/Trajectory/TaxiPorto/archive/porto_data_v2.csv";
+    char filename[] = "/home/yangguo/Dataset/trajectory/porto_data_v2.csv";
     FILE *fp = fopen(filename, "r");
 
     struct simple_query_engine query_engine;
@@ -77,6 +77,41 @@ TEST(queryengine, spatiotemporal) {
                                                         normalize_latitude(41.140746), normalize_latitude(41.140746),
                                                         1372636850, 1372636859};
     int result_count = spatio_temporal_query(&query_engine, &predicate);
+    printf("result count: %d\n", result_count);
+
+    free_query_engine(&query_engine);
+}
+
+TEST(queryengine, knn) {
+    init_and_mk_fs_for_traj(false);
+
+    //int data_block_num = 1024;
+
+    FILE *data_fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2.csv", "r");
+    // ingest data
+    struct simple_query_engine query_engine;
+    struct my_file data_file = {NULL, DATA_FILENAME, "w", SPDK_FS_MODE};
+    struct my_file index_file = {NULL, INDEX_FILENAME, "w", SPDK_FS_MODE};
+    struct my_file meta_file = {NULL, SEG_META_FILENAME, "w", SPDK_FS_MODE};
+    init_query_engine_with_persistence(&query_engine, &data_file, &index_file, &meta_file);
+    ingest_and_flush_data_via_zcurve_partition(&query_engine, data_fp, 1000);
+
+    // print temporal meta information for each block
+    struct index_entry_storage *index_storage = &query_engine.index_storage;
+    for (int i = 0; i <= index_storage->current_index; i++) {
+        struct index_entry *entry = index_storage->index_entry_base[i];
+        printf("block pointer: [%d], time min: %d, time max: %d, lon min: %d, lon max: %d, lat min: %d, lat max: %d\n", entry->block_logical_adr, entry->time_min, entry->time_max, entry->lon_min, entry->lon_max, entry->lat_min, entry->lat_max);
+    }
+
+    // save filesystem meta
+    spdk_flush_static_fs_meta_for_traj();
+
+    // query
+    struct spatio_temporal_knn_predicate predicate = {normalize_longitude(-8.610291),
+                                                        normalize_latitude(41.140746),
+                                                        100};
+    int result_count = spatio_temporal_knn_query_without_pushdown_batch(&query_engine, &predicate, false);
+
     printf("result count: %d\n", result_count);
 
     free_query_engine(&query_engine);

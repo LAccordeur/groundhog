@@ -19,20 +19,34 @@
  * a simple file system
  * - only support append-only write
  * - write and read should be sector-based
- * - the maximum size of data file is 16 GB and the maximum size of index file and meta file is 4 GB
+ * - the maximum size of data file is 16 GB and the maximum size of index file and meta file is 4 GB (old)
+ * - the maximum size of data file is 64 GB and the maximum size of index file and meta file is 16 GB
  *
  *  every time when reading data, you should reset the read offset via fseek()
  *  write_offset is controlled by the program itself
+ *
+ *  the meaning of prefix in the function name: "multi" means that we pass multiple lba address information via isp descriptor;
+ *  "batch" means that we submit multiple asyn i/o to ssd
  */
+//#define DATA_FILENAME "trajectory.data"
+//#define DATA_FILE_OFFSET 1
+//#define DATA_FILE_LENGTH 4194304
+//#define INDEX_FILENAME "trajectory.index"
+//#define INDEX_FILE_OFFSET 4194305
+//#define INDEX_FILE_LENGTH 1048576
+//#define SEG_META_FILENAME "trajectory_seg.meta"
+//#define SEG_META_FILE_OFFSET 5242881
+//#define SEG_META_FILE_LENGTH 1048576
+
 #define DATA_FILENAME "trajectory.data"
 #define DATA_FILE_OFFSET 1
-#define DATA_FILE_LENGTH 4194304
+#define DATA_FILE_LENGTH 16777216
 #define INDEX_FILENAME "trajectory.index"
-#define INDEX_FILE_OFFSET 4194305
-#define INDEX_FILE_LENGTH 1048576
+#define INDEX_FILE_OFFSET 16777217
+#define INDEX_FILE_LENGTH 4194304
 #define SEG_META_FILENAME "trajectory_seg.meta"
-#define SEG_META_FILE_OFFSET 5242881
-#define SEG_META_FILE_LENGTH 1048576
+#define SEG_META_FILE_OFFSET 20971521
+#define SEG_META_FILE_LENGTH 4194304
 
 
 struct spdk_static_fs_desc {
@@ -92,8 +106,26 @@ size_t spdk_static_fs_fwrite(const void *data_ptr, size_t size, struct spdk_stat
 
 size_t spdk_static_fs_fread(const void *data_ptr, size_t size, struct spdk_static_file_desc *file_desc);
 
+/**
+ * send multiple read requests asynchronously
+ * @param batch_size
+ * @param data_ptr_vec
+ * @param logical_sector_start
+ * @param size_vec
+ * @param file_desc
+ * @return
+ */
 size_t spdk_static_fs_fread_batch(int batch_size, const void **data_ptr_vec, const int *logical_sector_start, const size_t *size_vec, struct spdk_static_file_desc *file_desc);
 
+
+/**
+ * read multiple data sectors specified in the isp_desc
+ * @param data_ptr
+ * @param size
+ * @param file_desc
+ * @param isp_desc
+ * @return
+ */
 size_t spdk_static_fs_fread_multi_addr(const void *data_ptr, size_t size, struct spdk_static_file_desc *file_desc, struct isp_descriptor *isp_desc);
 
 /**
@@ -114,6 +146,12 @@ size_t spdk_static_fs_fread_isp_batch(int batch_size, const void **data_ptr_vec,
 
 size_t spdk_static_fs_fread_isp_fpga_batch(int batch_size, const void **data_ptr_vec, const size_t *size_vec, struct spdk_static_file_desc *file_desc, struct isp_descriptor **isp_desc_vec);
 
+/**
+ * not applicable for writes
+ * @param file_desc
+ * @param offset
+ * @return
+ */
 size_t spdk_static_fs_fseek(struct spdk_static_file_desc *file_desc, long long offset);
 
 

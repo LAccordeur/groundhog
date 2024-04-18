@@ -83,3 +83,9 @@ target_link_libraries(static_spdk_fs_layer_test gtest gtest_main ${SPDK_LIBS} ${
 
 add_executable(persistence_manager_test persistence_manager_test.cpp )
 target_link_libraries(persistence_manager_test gtest gtest_main ${SPDK_LIBS} ${CMAKE_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+
+add_executable(knn_util_test knn_util_test.cpp)
+target_link_libraries(knn_util_test gtest gtest_main ${CMAKE_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+
+add_executable(osm_dataset_reader_test osm_dataset_reader_test.cpp)
+target_link_libraries(osm_dataset_reader_test gtest gtest_main ${CMAKE_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)

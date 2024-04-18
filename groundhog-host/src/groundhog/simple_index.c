@@ -191,9 +191,9 @@ void free_index_entry(struct index_entry *entry) {
     if (entry->block_physical_ptr != NULL) {
         // free(entry->block_physical_ptr);  // freed by storage, not here
         entry->block_physical_ptr = NULL;
-        free(entry->oid_array);
-        entry->oid_array = NULL;
     }
+    free(entry->oid_array);
+    entry->oid_array = NULL;
     entry->block_logical_adr = -1;
 }
 
@@ -231,6 +231,7 @@ void fill_index_entry(struct index_entry *entry, struct traj_point **points, int
     entry->oid_array = (int *) malloc(unique_oid_num * sizeof(int));
     entry->oid_array_size = unique_oid_num;
     get_key_set(&oids, entry->oid_array);
+    delete_all(&oids);
 }
 
 void init_index_entry_storage(struct index_entry_storage *storage) {

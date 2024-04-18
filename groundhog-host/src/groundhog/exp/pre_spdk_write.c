@@ -230,7 +230,7 @@ hello_world(void)
 
         int block_num = 4096;
         int traj_block_size = 4096;
-        int split_segment_num = 10;
+        int split_segment_num = 4;
         int points_num = calculate_points_num_via_block_size(traj_block_size, split_segment_num);
         printf("point num per block: %d\n", points_num);
         FILE *fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2.csv", "r");
