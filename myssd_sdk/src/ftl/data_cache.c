@@ -1307,6 +1307,113 @@ static int handle_cached_exe_multi(struct user_request* req)
     } else if (descriptor->isp_type == 5) {
     	run_spatio_temporal_count_query_naive(get_local_var(req_iovecs), i,  &isp_buffer, descriptor);
 
+    } else if (descriptor->isp_type == 6) {
+    	struct knn_result_buffer knn_buffer;
+    	init_knn_result_buffer(descriptor->oid, &knn_buffer); // for knn query, the oid is the k
+    	run_spatio_temporal_knn_query(get_local_var(req_iovecs), i, &knn_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct result_item *buffer_dst = (struct result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knn_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knn_buffer.result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct result_item);
+    		isp_buffer.current_tuple_count++;
+    		//xil_printf("current dist: %d\n", knn_buffer.result_buffer_k[n].distance);
+    	}
+    	//xil_printf("buffer tuple count: %d, buffer size: %d\n", isp_buffer.current_tuple_count, isp_buffer.used_bytes_count);
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knn_result_buffer(&knn_buffer);
+    } else if (descriptor->isp_type == 7) {
+    	struct knnjoin_result_buffer knnjoin_buffer;
+    	init_knnjoin_result_buffer(descriptor->oid, &knnjoin_buffer);	// for knn join query, the oid is the k
+    	run_spatio_temporal_knn_join_query(get_local_var(req_iovecs), i, &knnjoin_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct knnjoin_result_item *buffer_dst = (struct knnjoin_result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knnjoin_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knnjoin_buffer.knnjoin_result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct knnjoin_result_item);
+    		isp_buffer.current_tuple_count++;
+
+    	}
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knnjoin_result_buffer(&knnjoin_buffer);
+    } else if (descriptor->isp_type == 61) {
+    	// knn query naive
+    	struct knn_result_buffer knn_buffer;
+    	init_knn_result_buffer(descriptor->oid, &knn_buffer); // for knn query, the oid is the k
+    	run_spatio_temporal_knn_query_naive(get_local_var(req_iovecs), i, &knn_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct result_item *buffer_dst = (struct result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knn_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knn_buffer.result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct result_item);
+    		isp_buffer.current_tuple_count++;
+    		//xil_printf("current dist: %d\n", knn_buffer.result_buffer_k[n].distance);
+    	}
+    	//xil_printf("buffer tuple count: %d, buffer size: %d\n", isp_buffer.current_tuple_count, isp_buffer.used_bytes_count);
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knn_result_buffer(&knn_buffer);
+    } else if (descriptor->isp_type == 62) {
+    	// knn query naive + add mbr pruning
+    	struct knn_result_buffer knn_buffer;
+    	init_knn_result_buffer(descriptor->oid, &knn_buffer); // for knn query, the oid is the k
+    	run_spatio_temporal_knn_query_naive_add_mbr_pruning(get_local_var(req_iovecs), i, &knn_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct result_item *buffer_dst = (struct result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knn_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knn_buffer.result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct result_item);
+    		isp_buffer.current_tuple_count++;
+    		//xil_printf("current dist: %d\n", knn_buffer.result_buffer_k[n].distance);
+    	}
+    	//xil_printf("buffer tuple count: %d, buffer size: %d\n", isp_buffer.current_tuple_count, isp_buffer.used_bytes_count);
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knn_result_buffer(&knn_buffer);
+    } else if (descriptor->isp_type == 71) {
+    	struct knnjoin_result_buffer knnjoin_buffer;
+    	init_knnjoin_result_buffer(descriptor->oid, &knnjoin_buffer);	// for knn join query, the oid is the k
+    	run_spatio_temporal_knn_join_query_naive(get_local_var(req_iovecs), i, &knnjoin_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct knnjoin_result_item *buffer_dst = (struct knnjoin_result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knnjoin_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knnjoin_buffer.knnjoin_result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct knnjoin_result_item);
+    		isp_buffer.current_tuple_count++;
+
+    	}
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knnjoin_result_buffer(&knnjoin_buffer);
+    } else if (descriptor->isp_type == 72) {
+    	struct knnjoin_result_buffer knnjoin_buffer;
+    	init_knnjoin_result_buffer(descriptor->oid, &knnjoin_buffer);	// for knn join query, the oid is the k
+    	run_spatio_temporal_knn_join_query_naive_add_mbr_pruning(get_local_var(req_iovecs), i, &knnjoin_buffer, descriptor);
+
+    	// write data to isp buffer
+    	struct knnjoin_result_item *buffer_dst = (struct knnjoin_result_item*)((char*)isp_buffer.iov[0].iov_base + 4);
+
+    	for (int n = 0; n < knnjoin_buffer.current_buffer_size; n++) {
+    		buffer_dst[isp_buffer.current_tuple_count] = knnjoin_buffer.knnjoin_result_buffer_k[n];
+    		isp_buffer.used_bytes_count += sizeof(struct knnjoin_result_item);
+    		isp_buffer.current_tuple_count++;
+
+    	}
+
+    	add_result_count_new_format(&isp_buffer);
+    	free_knnjoin_result_buffer(&knnjoin_buffer);
     }
 
 
