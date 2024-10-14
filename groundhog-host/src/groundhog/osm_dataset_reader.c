@@ -16,15 +16,6 @@ void parse_osm_row(char* line, struct traj_point *destination_row) {
         destination_row->oid = atoi(token);
     }
 
-    // no time info for osm
-    /*// timestamp_sec
-    token = strtok(NULL, ",");
-    if (token) {
-
-        int normalized_time = normalize_datetime(token);
-        destination_row->timestamp_sec = normalized_time;
-    }*/
-
 
 
     // longitude
@@ -37,12 +28,20 @@ void parse_osm_row(char* line, struct traj_point *destination_row) {
     }
 
     // latitude
-    token = strtok(NULL, "\n");
+    token = strtok(NULL, ",");
     //double latitude = atof(token);
     if (token) {
         double latitude = atof(token);
         int normalized_value = normalize_latitude(latitude);
         destination_row->normalized_latitude = normalized_value;
+    }
+
+    // timestamp_sec
+    token = strtok(NULL, "\n");
+    if (token) {
+
+        //int normalized_time = normalize_datetime(token);
+        destination_row->timestamp_sec = atoi(token);
     }
 }
 

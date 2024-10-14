@@ -13,12 +13,22 @@
  */
 void sort_traj_points(struct traj_point **points, int array_size);
 
+void sort_traj_points_longitude(struct traj_point **points, int array_size);
+
+void sort_traj_points_latitude(struct traj_point **points, int array_size);
+
+void sort_traj_points_timestamp(struct traj_point **points, int array_size);
+
+void sort_traj_points_zcurve_st(struct traj_point **points, int array_size);
+
 /**
  * according to zcurve
  * @param points
  * @param array_size
  */
 void sort_traj_points_zcurve(struct traj_point **points, int array_size);
+
+void sort_traj_points_zcurve_with_option(struct traj_point **points, int array_size, int option);
 
 /**
  * deprecated

@@ -19,7 +19,7 @@ TEST(isp_descriptor, test) {
     descriptor.lon_max = 13;
     descriptor.lat_min = 21;
     descriptor.lat_max = 34;
-    descriptor.lba_count = 3;
+    descriptor.lba_count = 252;
     descriptor.estimated_result_page_num = 12;
     struct lba lbas[3];
     lbas[0].start_lba = 1;
@@ -31,6 +31,8 @@ TEST(isp_descriptor, test) {
     descriptor.lba_array = lbas;
 
     int descriptor_space = calculate_isp_descriptor_space(&descriptor);
+    printf("isp descriptor size: %d\n", descriptor_space);
+
     print_isp_descriptor(&descriptor);
     char block[descriptor_space];
     serialize_isp_descriptor(&descriptor, block);
@@ -38,6 +40,8 @@ TEST(isp_descriptor, test) {
     struct isp_descriptor result;
     deserialize_isp_descriptor(block, &result);
     print_isp_descriptor(&result);
+
+
 
     free_isp_descriptor(&result);
 }

@@ -89,3 +89,6 @@ target_link_libraries(knn_util_test gtest gtest_main ${CMAKE_SOURCE_DIR}/cmake-b
 
 add_executable(osm_dataset_reader_test osm_dataset_reader_test.cpp)
 target_link_libraries(osm_dataset_reader_test gtest gtest_main ${CMAKE_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+
+add_executable(geolife_dataset_reader_test geolife_dataset_reader_test.cpp)
+target_link_libraries(geolife_dataset_reader_test gtest gtest_main ${CMAKE_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)

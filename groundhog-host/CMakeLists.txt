@@ -79,14 +79,14 @@ add_library(traj_block_format
         include/groundhog/bloom/hashf.h
         include/groundhog/nyc_dataset_reader.h
         include/groundhog/knn_util.h src/groundhog/knn_util.c
-        include/groundhog/osm_dataset_reader.h src/groundhog/osm_dataset_reader.c src/common_util.c)
+        include/groundhog/osm_dataset_reader.h src/groundhog/osm_dataset_reader.c src/common_util.c include/groundhog/geolife_dataset_reader.h src/groundhog/geolife_dataset_reader.c)
 
 
-add_executable(mymain src/groundhog/mymain.c)
-target_link_libraries(mymain ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+#add_executable(mymain src/groundhog/mymain.c)
+#target_link_libraries(mymain ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
 
-add_executable(simple_verification src/groundhog/simple_verification.c)
-target_link_libraries(simple_verification ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+#add_executable(simple_verification src/groundhog/simple_verification.c)
+#target_link_libraries(simple_verification ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
 
 add_executable(exp_native_host_and_device src/groundhog/exp/exp_native_host_and_device.c)
 target_link_libraries(exp_native_host_and_device ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
@@ -114,6 +114,12 @@ target_link_libraries(pre_spdk_flush ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-bu
 
 add_executable(pre_spdk_read src/groundhog/exp/pre_spdk_read.c)
 target_link_libraries(pre_spdk_read ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+
+add_executable(exp_native_random_read src/groundhog/exp/exp_native_random_read.c)
+target_link_libraries(exp_native_random_read ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
+
+add_executable(exp_native_random_write src/groundhog/exp/exp_native_random_write.c)
+target_link_libraries(exp_native_random_write ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)
 
 add_executable(pre_spdk_read_multithread src/groundhog/exp/pre_spdk_read_multithread.c)
 target_link_libraries(pre_spdk_read_multithread ${SPDK_LIBS} ${PROJECT_SOURCE_DIR}/cmake-build-debug/libtraj_block_format.a)

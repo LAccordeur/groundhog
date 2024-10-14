@@ -275,6 +275,24 @@ int read_spatio_temporal_queries_from_csv_nyc(FILE *fp, struct spatio_temporal_r
     return line_count;
 }
 
+int read_spatio_temporal_queries_from_csv_geolife(FILE *fp, struct spatio_temporal_range_predicate **predicate, int row_count) {
+    fseek(fp, 0, SEEK_SET);
+
+    char line[128];
+    int line_count = 0;
+    while (fgets(line, 128, fp)) {
+        struct spatio_temporal_range_predicate *row = predicate[line_count];
+        parse_spatio_temporal_row(line, row);
+        line_count++;
+
+        if (line_count >= row_count) {
+            break;
+        }
+    }
+
+    return line_count;
+}
+
 struct spatio_temporal_knn_predicate** allocate_spatio_temporal_knn_predicate_mem(int array_size) {
     struct spatio_temporal_knn_predicate **predicates;
     predicates = (struct spatio_temporal_knn_predicate**) malloc(array_size * sizeof(struct spatio_temporal_knn_predicate));

@@ -23,6 +23,14 @@ struct runtime_statistics {
     int checked_segment_num;
 };
 
+struct heap_runtime_statistics {
+    int heap_sawp_operation_count;
+    int add_to_heap_item_count;
+    int add_to_buffer_item_count;
+    int non_discard_count;
+    int discard_count;
+};
+
 struct result_item {
     struct traj_point point;
     long distance;
@@ -34,6 +42,85 @@ struct knnjoin_result_item {
     long distance;
 };
 
+
+struct knn_max_heap {
+    struct result_item *arr;
+    int size;
+    int capacity;
+    struct heap_runtime_statistics statistics;
+};
+
+struct knnjoin_max_heap {
+    struct knnjoin_result_item *arr;
+    int size;
+    int capacity;
+    struct heap_runtime_statistics statistics;
+};
+
+struct buffered_knn_max_heap {
+    struct knn_max_heap *h;
+    struct result_item *result_buffer;
+    int buffer_factor;
+    int buffer_capacity;
+    int buffer_size;
+    long max_distance_ref;
+    bool is_max_dist_ref_initialized;
+    struct heap_runtime_statistics statistics;
+};
+
+struct knn_max_heap* create_knn_max_heap(int capacity);
+
+void free_knn_max_heap(struct knn_max_heap *h);
+
+struct result_item knn_max_heap_extract_max(struct knn_max_heap *h);
+
+void knn_max_heap_insert(struct knn_max_heap *h, struct result_item *item);
+
+void knn_max_heap_replace(struct knn_max_heap *h, struct result_item *item);
+
+struct result_item knn_max_heap_find_max(struct knn_max_heap *h);
+
+void print_knn_max_heap(struct knn_max_heap *h);
+
+
+
+struct knnjoin_max_heap* create_knnjoin_max_heap(int capacity);
+
+void free_knnjoin_max_heap(struct knnjoin_max_heap *h);
+
+struct knnjoin_result_item knnjoin_max_heap_extract_max(struct knnjoin_max_heap *h);
+
+void knnjoin_max_heap_insert(struct knnjoin_max_heap *h, struct knnjoin_result_item *item);
+
+void knnjoin_max_heap_replace(struct knnjoin_max_heap *h, struct knnjoin_result_item *item);
+
+struct knnjoin_result_item knnjoin_max_heap_find_max(struct knnjoin_max_heap *h);
+
+void print_knnjoin_max_heap(struct knnjoin_max_heap *h);
+
+
+
+struct buffered_knn_max_heap* create_buffered_knn_max_heap(int capacity, int buffer_factor);
+
+void free_buffered_knn_max_heap(struct buffered_knn_max_heap *bh);
+
+void buffered_knn_max_heap_insert(struct buffered_knn_max_heap *bh, struct result_item *item);
+
+void buffered_knn_max_heap_compact(struct buffered_knn_max_heap *bh);
+
+
+
+
+long cal_points_distance(struct traj_point *point1, struct traj_point *point2);
+
+long cal_min_distance(struct traj_point *point, struct seg_meta *mbr);
+
+long cal_minmax_distance(struct traj_point *point, struct seg_meta *mbr);
+
+void print_runtime_statistics(struct runtime_statistics *statistics);
+
+
+// not used
 struct knn_result_buffer {
     int buffer_capacity;    // equal to the parameter k
     int current_buffer_size; // the number of items in the result_buffer_k
@@ -47,6 +134,7 @@ struct knn_result_buffer {
     struct runtime_statistics statistics;
 };
 
+// not used
 struct knnjoin_result_buffer {
     int buffer_capacity;
     int current_buffer_size;
@@ -60,6 +148,7 @@ struct knnjoin_result_buffer {
     struct runtime_statistics statistics;
 };
 
+// not used (replaced by heap)
 void init_knn_result_buffer(int k, struct knn_result_buffer *buffer);
 
 void free_knn_result_buffer(struct knn_result_buffer *buffer);
@@ -72,7 +161,9 @@ void add_item_to_buffer(struct knn_result_buffer *buffer, struct result_item *it
 
 void combine_and_sort(struct knn_result_buffer *buffer);
 
+void print_result_buffer(struct knn_result_buffer *buffer);
 
+// not used (replaced by heap)
 void init_knnjoin_result_buffer(int k, struct knnjoin_result_buffer *buffer);
 
 void free_knnjoin_result_buffer(struct knnjoin_result_buffer *buffer);
@@ -85,16 +176,6 @@ void add_item_to_knnjoin_buffer(struct knnjoin_result_buffer *buffer, struct knn
 
 void combine_and_sort_knnjoin(struct knnjoin_result_buffer *buffer);
 
-
-long cal_points_distance(struct traj_point *point1, struct traj_point *point2);
-
-long cal_min_distance(struct traj_point *point, struct seg_meta *mbr);
-
-long cal_minmax_distance(struct traj_point *point, struct seg_meta *mbr);
-
-void print_result_buffer(struct knn_result_buffer *buffer);
-
 void print_knnjoin_result_buffer(struct knnjoin_result_buffer *buffer);
 
-void print_runtime_statistics(struct runtime_statistics *statistics);
 #endif //TRAJ_BLOCK_FORMAT_KNN_UTIL_H

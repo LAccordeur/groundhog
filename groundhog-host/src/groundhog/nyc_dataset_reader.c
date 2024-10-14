@@ -65,3 +65,5 @@ int read_points_from_csv_nyc(FILE *fp, struct traj_point **points, int row_offse
     }
     return line_count;
 }
+
+

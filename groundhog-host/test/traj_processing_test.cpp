@@ -23,13 +23,49 @@ TEST(traj_processing, sort) {
 }
 
 TEST(traj_processing, zcurve_sort) {
-    int array_size = 225 * 1024;
+    int array_size = 6;
     struct traj_point **points = allocate_points_memory(array_size);
     FILE *fp = fopen("/home/yangguo/Dataset/trajectory/porto_data_v2.csv", "r");
 
     read_points_from_csv(fp, points, 0, array_size);
     print_traj_points(points, array_size);
-    sort_traj_points_zcurve(points, array_size);
+    sort_traj_points_zcurve_with_option(points, array_size, 2);
+    printf("\n\n");
+    print_traj_points(points, array_size);
+}
+
+
+TEST(traj_processing, zcurve_sort_option) {
+    int array_size = 6;
+    struct traj_point **points = allocate_points_memory(array_size);
+    points[0]->timestamp_sec = 6;
+    points[0]->normalized_longitude = 6;
+    points[0]->normalized_latitude = 6;
+
+    points[1]->timestamp_sec = 6;
+    points[1]->normalized_longitude = 8;
+    points[1]->normalized_latitude = 8;
+
+    points[2]->timestamp_sec = 6;
+    points[2]->normalized_longitude = 2;
+    points[2]->normalized_latitude = 2;
+
+    points[3]->timestamp_sec = 3;
+    points[3]->normalized_longitude = 6;
+    points[3]->normalized_latitude = 6;
+
+    points[4]->timestamp_sec = 3;
+    points[4]->normalized_longitude = 9;
+    points[4]->normalized_latitude = 9;
+
+    points[5]->timestamp_sec = 3;
+    points[5]->normalized_longitude = 1;
+    points[5]->normalized_latitude = 1;
+
+
+
+    print_traj_points(points, array_size);
+    sort_traj_points_zcurve_with_option(points, array_size, 2);
     printf("\n\n");
     print_traj_points(points, array_size);
 }

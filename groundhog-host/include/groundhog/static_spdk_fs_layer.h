@@ -47,6 +47,9 @@
 #define SEG_META_FILENAME "trajectory_seg.meta"
 #define SEG_META_FILE_OFFSET 20971521
 #define SEG_META_FILE_LENGTH 4194304
+#define TEST_FILENAME "test.file"
+#define TEST_FILE_OFFSET 25165825
+#define TEST_FILE_LENGTH 4194304
 
 
 struct spdk_static_fs_desc {

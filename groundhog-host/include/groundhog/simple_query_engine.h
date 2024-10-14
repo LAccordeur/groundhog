@@ -23,6 +23,21 @@ struct id_temporal_predicate {
     int time_max;
 };
 
+struct query_statistics {
+    long result_count;
+    long read_block_num;
+    double selectivity;
+    int total_segment_num;
+    int checked_segment_num;
+    double offload_ratio;
+    double offload_selectivity;
+    double host_selectivity;
+    long host_comp_time;
+    long planning_time;
+    long result_estimation_time;
+};
+
+
 struct spatio_temporal_range_predicate {
     int lon_min;    // normalized value, same below
     int lon_max;
@@ -30,6 +45,7 @@ struct spatio_temporal_range_predicate {
     int lat_max;
     int time_min;
     int time_max;
+    struct query_statistics statistics;
 };
 
 struct spatio_temporal_knn_predicate {
@@ -67,10 +83,20 @@ void ingest_and_flush_nyc_data_via_time_partition(struct simple_query_engine *en
 
 void ingest_and_flush_data_via_time_partition_with_block_index(struct simple_query_engine *engine, FILE *fp, int block_index, int block_num);
 
+void ingest_and_flush_nyc_data_via_zcurve_partition(struct simple_query_engine *engine, FILE *fp, int block_num);
+
+void ingest_and_flush_nyc_data_via_zcurve_partition_with_sort_option(struct simple_query_engine *engine, FILE *fp, int block_num, int sort_option);
+
 // porto data
 void ingest_and_flush_data_via_zcurve_partition(struct simple_query_engine *engine, FILE *fp, int block_num);
 
-void ingest_and_flush_nyc_data_via_zcurve_partition(struct simple_query_engine *engine, FILE *fp, int block_num);
+void ingest_and_flush_data_via_zcurve_partition_with_sort_option(struct simple_query_engine *engine, FILE *fp, int block_num, int sort_option);
+
+
+// geolife data
+void ingest_and_flush_geolife_data_via_zcurve_partition_with_sort_option(struct simple_query_engine *engine, FILE *fp, int block_num, int sort_option);
+
+void ingest_and_flush_data_via_str_with_dataset_option(struct simple_query_engine *engine, FILE *fp, int block_num, int dataset_option);
 
 /**
  *
@@ -88,6 +114,8 @@ void ingest_and_flush_synthetic_data_via_time_partition_with_block_index(struct 
 
 
 void ingest_and_flush_osm_data_via_zcurve_partition_with_block_index(struct simple_query_engine *engine, FILE *fp, int block_index, int block_num);
+
+void ingest_and_flush_osm_data_via_zcurve_partition_with_block_index_with_sort_option(struct simple_query_engine *engine, FILE *fp, int block_index, int block_num, int sort_option);
 
 void ingest_and_flush_osm_data_via_time_partition_with_block_index(struct simple_query_engine *engine, FILE *fp, int block_index, int block_num);
 
@@ -162,6 +190,12 @@ int spatio_temporal_query_with_full_pushdown_batch(struct simple_query_engine *e
 
 int spatio_temporal_query_with_adaptive_pushdown_batch(struct simple_query_engine *engine, struct spatio_temporal_range_predicate *predicate, bool enable_host_index);
 
+int spatio_temporal_query_with_adaptive_pushdown_batch_ideal(struct simple_query_engine *engine, struct spatio_temporal_range_predicate *predicate, bool enable_host_index);
+
+int spatio_temporal_query_count_block_num_batch(struct simple_query_engine *engine, struct spatio_temporal_range_predicate *predicate, bool enable_host_index);
+
+double spatio_temporal_query_selectivity_batch(struct simple_query_engine *engine, struct spatio_temporal_range_predicate *predicate, bool enable_host_index);
+
 // not used
 int spatio_temporal_query_with_full_pushdown(struct simple_query_engine *engine, struct spatio_temporal_range_predicate *predicate, bool enable_host_index);
 // not used
@@ -215,6 +249,8 @@ int spatio_temporal_knn_query_without_pushdown_batch(struct simple_query_engine 
 
 // option specifies the pushdown method: 1 -> naive implementation (w/o pruning and sorting optimization), 2 -> naive + mbr pruning, 3 -> optimized version
 int spatio_temporal_knn_query_with_pushdown_batch(struct simple_query_engine *engine, struct spatio_temporal_knn_predicate *predicate, int option, bool enable_host_index);
+
+int spatio_temporal_knn_query_do_nothing_batch(struct simple_query_engine *engine, struct spatio_temporal_knn_predicate *predicate, bool enable_host_index);
 
 
 /**

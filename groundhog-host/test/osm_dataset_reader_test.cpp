@@ -11,7 +11,7 @@ extern "C" {
 
 TEST(osmreadtest, readpoints) {
 
-    FILE *fp = fopen("/home/yangguo/Dataset/osm/osm_points_v1.csv", "r");
+    FILE *fp = fopen("/home/yangguo/Dataset/osm/osm_points_with_time_v1.csv", "r");
 
     struct traj_point **points = allocate_points_memory(16);
 

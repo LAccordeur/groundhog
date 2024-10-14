@@ -1,6 +1,0 @@
-#ifndef TRAJ_BLOCK_FORMAT_LIBRARY_H
-#define TRAJ_BLOCK_FORMAT_LIBRARY_H
-
-void hello(void);
-
-#endif //TRAJ_BLOCK_FORMAT_LIBRARY_H

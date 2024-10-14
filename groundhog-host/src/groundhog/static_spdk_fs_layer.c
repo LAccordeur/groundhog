@@ -20,7 +20,7 @@ struct callback_sequence {
 
 struct spdk_static_fs_desc spdk_static_fs_layer_for_traj;
 static struct spdk_nvme_driver_desc spdk_driver_desc;
-static struct spdk_static_file_desc file_desc_vec[3];
+static struct spdk_static_file_desc file_desc_vec[4];
 
 static bool has_unfinished_requests(struct callback_sequence *sequence_arr, int arr_size);
 
@@ -53,7 +53,13 @@ void init_and_mk_fs_for_traj(bool is_flushed) {
     file_desc_vec[2].start_lba = SEG_META_FILE_OFFSET;
     file_desc_vec[2].sector_count = SEG_META_FILE_LENGTH;
 
-    spdk_mk_static_fs(&spdk_static_fs_layer_for_traj, file_desc_vec, 3, &spdk_driver_desc, is_flushed);
+    file_desc_vec[3].current_read_offset = 0;
+    file_desc_vec[3].current_write_offset = 0;
+    memcpy(file_desc_vec[3].filename, TEST_FILENAME, sizeof(TEST_FILENAME));
+    file_desc_vec[3].start_lba = TEST_FILE_OFFSET;
+    file_desc_vec[3].sector_count = TEST_FILE_LENGTH;
+
+    spdk_mk_static_fs(&spdk_static_fs_layer_for_traj, file_desc_vec, 4, &spdk_driver_desc, is_flushed);
 
 }
 
@@ -277,6 +283,7 @@ int init_spdk_nvme_driver(struct spdk_nvme_driver_desc *driver_desc) {
     struct spdk_env_opts opts;
 
     spdk_env_opts_init(&opts);
+    opts.shm_id = 1;
     spdk_nvme_trid_populate_transport(&g_trid, SPDK_NVME_TRANSPORT_PCIE);
 
     opts.name = "spdk_static_fs_driver";
@@ -648,6 +655,7 @@ size_t spdk_static_fs_fread_multi_addr(const void *data_ptr, size_t size, struct
     int desc_size = calculate_isp_descriptor_space(isp_desc);
     if (desc_size >= 4096) {
         printf("the descriptor size is too big\n");
+        return -1;
     }
     serialize_isp_descriptor(isp_desc, sequence.buf);
 
@@ -715,6 +723,7 @@ size_t spdk_static_fs_fread_isp(const void *data_ptr, size_t size, struct spdk_s
     int desc_size = calculate_isp_descriptor_space(isp_desc);
     if (desc_size >= 4096) {
         printf("the descriptor size is too big\n");
+        return -1;
     }
     serialize_isp_descriptor(isp_desc, sequence.buf);
 
@@ -781,6 +790,7 @@ size_t spdk_static_fs_fread_isp_fpga(const void *data_ptr, size_t size, struct s
     int desc_size = calculate_isp_descriptor_space(isp_desc);
     if (desc_size >= 4096) {
         printf("the descriptor size is too big\n");
+        return -1;
     }
     serialize_isp_descriptor(isp_desc, sequence.buf);
 
@@ -865,6 +875,7 @@ size_t spdk_static_fs_fread_multi_addr_batch(int batch_size, const void **data_p
         int desc_size = calculate_isp_descriptor_space(isp_desc_vec[i]);
         if (desc_size >= 4096) {
             printf("the descriptor size is too big\n");
+            break;
         }
         serialize_isp_descriptor(isp_desc_vec[i], sequences[i].buf);
 
@@ -944,6 +955,7 @@ size_t spdk_static_fs_fread_hybrid_comp_batch(struct spdk_static_file_desc *file
         int desc_size = calculate_isp_descriptor_space(host_isp_desc_vec[i]);
         if (desc_size >= 4096) {
             printf("the descriptor size is too big\n");
+            break;
         }
         serialize_isp_descriptor(host_isp_desc_vec[i], sequences[i].buf);
 
@@ -1024,6 +1036,7 @@ size_t spdk_static_fs_fread_isp_batch(int batch_size, const void **data_ptr_vec,
         int desc_size = calculate_isp_descriptor_space(isp_desc_vec[i]);
         if (desc_size >= 4096) {
             printf("the descriptor size is too big\n");
+            break;
         }
         serialize_isp_descriptor(isp_desc_vec[i], sequences[i].buf);
 
@@ -1107,6 +1120,7 @@ size_t spdk_static_fs_fread_isp_fpga_batch(int batch_size, const void **data_ptr
         int desc_size = calculate_isp_descriptor_space(isp_desc_vec[i]);
         if (desc_size >= 4096) {
             printf("the descriptor size is too big\n");
+            break;
         }
         serialize_isp_descriptor(isp_desc_vec[i], sequences[i].buf);
 
